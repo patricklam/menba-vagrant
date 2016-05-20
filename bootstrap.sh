@@ -8,7 +8,7 @@ case $(id -u) in
         echo "mysql-server mysql-server/root_password password $DBPASSWD" | debconf-set-selections
         echo "mysql-server mysql-server/root_password_again password $DBPASSWD" | debconf-set-selections
         apt-get update
-        apt-get install -y apache2 libapache2-mod-php5 mysql-server mysql-client drush php5-gd php5-curl php5-dev make php-fpdf git unzip
+        apt-get install -y apache2 libapache2-mod-php5 mysql-server mysql-client drush php5-gd php5-curl php5-dev make php-fpdf git unzip maven
         apt-get install -y ant openjdk-7-jdk
         adduser vagrant www-data
         adduser vagrant adm
@@ -96,10 +96,24 @@ EOF
         if [ ! -d tools ]; then
             mkdir -p tools
             if [ ! -f tools/gwt-2.7.0.zip ]; then
-                cd tools
+                cd ~/tools
                 wget http://storage.googleapis.com/gwt-releases/gwt-2.7.0.zip
                 unzip gwt-2.7.0.zip
             fi
+	    if [ ! -f ~/tools/gwtbootstrap3 ]; then
+		cd ~/tools
+                git clone https://github.com/gwtbootstrap3/gwtbootstrap3
+		cd gwtbootstrap3
+		mvn package
+		cp gwtbootstrap3/target/gwtbootstrap3-1.0-SNAPSHOT.jar ~/tools
+            fi
+	    if [ ! -f ~/tools/gwtbootstrap3-extra ]; then
+		cd ~/tools
+		git clone https://github.com/gwtbootstrap3/gwtbootstrap3-extras
+		cd gwtbootstrap3-extras
+		mvn package
+		cp target/gwtbootstrap3-extras-1.0-SNAPSHOT.jar ~/tools
+	    fi
         fi
 
         cd ~/JudoDB
