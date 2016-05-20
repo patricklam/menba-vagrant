@@ -76,7 +76,7 @@ EOF
             mysql -uroot -p$DBPASSWD < judodb-backend/db.sql
             mysql -uroot -p$DBPASSWD -e "CREATE USER $DBUSER"
             mysql -uroot -p$DBPASSWD -e "GRANT ALL PRIVILEGES ON $DBNAME.* TO '$DBUSER'@'localhost' identified by '$DBPASSWD'"
-            mysql -uroot -p$DBPASSWD -e "CREATE DATABASE $DBNAME"
+            mysql -uroot -p$DBPASSWD -e "CREATE DATABASE IF NOT EXISTS $DBNAME"
             mysql -uroot -p$DBPASSWD $DBNAME < judodb-backend/db.sql
             cat > judodb-backend/_dbconfig.php <<EOF
 <?php
