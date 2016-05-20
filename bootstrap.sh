@@ -116,23 +116,23 @@ EOF
 	    fi
         fi
 
+        mkdir -p ~/bin
+	if [ ! -f ~/bin/compile ]; then
+	    cat > ~/bin/compile <<EOF
+ant
+sudo cp -a /home/vagrant/JudoDB/war/* /var/www/frontend
+EOF
+	    chmod +x ~/bin/compile
+	fi
+
         cd ~/JudoDB
-        ant
+	~/bin/compile
 
         if [ ! -d /var/www/frontend ]; then
             sudo mkdir /var/www/frontend
             sudo cp -a /home/vagrant/JudoDB/war/* /var/www/frontend
             sudo cp /var/www/frontend/_config_template.php /var/www/frontend/_config.php
         fi
-
-	if [ ! -d ~/bin ]; then
-	    mkdir ~/bin
-	    cat > ~/bin/compile >>EOF
-ant
-sudo cp -a /home/vagrant/JudoDB/war/* /var/www/frontend
-EOF
-	    chmod +x ~/bin/compile
-	fi
 
         ;;
 esac
