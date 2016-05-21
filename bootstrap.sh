@@ -120,7 +120,7 @@ EOF
 	if [ ! -f ~/bin/compile ]; then
 	    cat > ~/bin/compile <<EOF
 ant
-sudo cp -a /home/vagrant/JudoDB/war/* /var/www/frontend
+cp -a /home/vagrant/JudoDB/war/* /var/www/frontend
 EOF
 	    chmod +x ~/bin/compile
 	fi
@@ -132,6 +132,8 @@ EOF
             sudo mkdir /var/www/frontend
             sudo cp -a /home/vagrant/JudoDB/war/* /var/www/frontend
             sudo cp /var/www/frontend/_config_template.php /var/www/frontend/_config.php
+	    sudo chgrp -R www-data /var/www/frontend
+	    sudo chmod -R g+w /var/www/frontend
         fi
 
         ;;
