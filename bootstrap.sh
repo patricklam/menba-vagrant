@@ -8,7 +8,7 @@ case $(id -u) in
         echo "mysql-server mysql-server/root_password password $DBPASSWD" | debconf-set-selections
         echo "mysql-server mysql-server/root_password_again password $DBPASSWD" | debconf-set-selections
         apt-get update
-        apt-get install -y apache2 libapache2-mod-php5 mysql-server mysql-client drush php5-gd php5-curl php5-dev make php-fpdf git unzip
+        apt-get install -y apache2 libapache2-mod-php5 mysql-server mysql-client drush php5-gd php5-curl php5-dev make php-fpdf git unzip maven
         apt-get install -y ant openjdk-7-jdk
         adduser vagrant www-data
         adduser vagrant adm
@@ -78,7 +78,7 @@ EOF
             mysql -uroot -p$DBPASSWD < judodb-backend/db.sql
             mysql -uroot -p$DBPASSWD -e "CREATE USER $DBUSER"
             mysql -uroot -p$DBPASSWD -e "GRANT ALL PRIVILEGES ON $DBNAME.* TO '$DBUSER'@'localhost' identified by '$DBPASSWD'"
-            mysql -uroot -p$DBPASSWD -e "CREATE DATABASE $DBNAME"
+            mysql -uroot -p$DBPASSWD -e "CREATE DATABASE IF NOT EXISTS $DBNAME"
             mysql -uroot -p$DBPASSWD $DBNAME < judodb-backend/db.sql
             cat > judodb-backend/_dbconfig.php <<EOF
 <?php
@@ -98,29 +98,45 @@ EOF
         if [ ! -d tools ]; then
             mkdir -p tools
             if [ ! -f tools/gwt-2.7.0.zip ]; then
-                cd tools
+                cd ~/tools
                 wget http://storage.googleapis.com/gwt-releases/gwt-2.7.0.zip
                 unzip gwt-2.7.0.zip
             fi
+	    if [ ! -f ~/tools/gwtbootstrap3 ]; then
+		cd ~/tools
+                git clone https://github.com/gwtbootstrap3/gwtbootstrap3
+		cd gwtbootstrap3
+		mvn package
+		cp gwtbootstrap3/target/gwtbootstrap3-1.0-SNAPSHOT.jar ~/tools
+            fi
+	    if [ ! -f ~/tools/gwtbootstrap3-extra ]; then
+		cd ~/tools
+		git clone https://github.com/gwtbootstrap3/gwtbootstrap3-extras
+		cd gwtbootstrap3-extras
+		mvn package
+		cp target/gwtbootstrap3-extras-1.0-SNAPSHOT.jar ~/tools
+	    fi
         fi
 
+        mkdir -p ~/bin
+	if [ ! -f ~/bin/compile ]; then
+	    cat > ~/bin/compile <<EOF
+ant
+cp -a /home/vagrant/JudoDB/war/* /var/www/frontend
+EOF
+	    chmod +x ~/bin/compile
+	fi
+
         cd ~/JudoDB
-        ant
+	~/bin/compile
 
         if [ ! -d /var/www/frontend ]; then
             sudo mkdir /var/www/frontend
             sudo cp -a /home/vagrant/JudoDB/war/* /var/www/frontend
             sudo cp /var/www/frontend/_config_template.php /var/www/frontend/_config.php
+	    sudo chgrp -R www-data /var/www/frontend
+	    sudo chmod -R g+w /var/www/frontend
         fi
-
-	if [ ! -d ~/bin ]; then
-	    mkdir ~/bin
-	    cat > ~/bin/compile >>EOF
-ant
-sudo cp -a /home/vagrant/JudoDB/war/* /var/www/frontend
-EOF
-	    chmod +x ~/bin/compile
-	fi
 
         ;;
 esac
