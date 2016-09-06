@@ -75,10 +75,9 @@ EOF
             git clone https://github.com/patricklam/judodb-backend.git
             chgrp www-data judodb-backend/backups
             chmod g+w judodb-backend/backups
-            mysql -uroot -p$DBPASSWD < judodb-backend/db.sql
+            mysql -uroot -p$DBPASSWD -e "CREATE DATABASE IF NOT EXISTS $DBNAME"
             mysql -uroot -p$DBPASSWD -e "CREATE USER $DBUSER"
             mysql -uroot -p$DBPASSWD -e "GRANT ALL PRIVILEGES ON $DBNAME.* TO '$DBUSER'@'localhost' identified by '$DBPASSWD'"
-            mysql -uroot -p$DBPASSWD -e "CREATE DATABASE IF NOT EXISTS $DBNAME"
             mysql -uroot -p$DBPASSWD $DBNAME < judodb-backend/db.sql
             cat > judodb-backend/_dbconfig.php <<EOF
 <?php
@@ -128,7 +127,7 @@ EOF
 	fi
 
         cd ~/JudoDB
-	~/bin/compile
+        ~/bin/compile
 
         if [ ! -d /var/www/frontend ]; then
             sudo mkdir /var/www/frontend
